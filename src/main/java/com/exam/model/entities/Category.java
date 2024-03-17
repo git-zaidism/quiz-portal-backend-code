@@ -1,4 +1,4 @@
-package com.exam.model.exam;
+package com.exam.model.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -15,6 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long cid;

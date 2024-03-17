@@ -1,4 +1,4 @@
-package com.exam.model;
+package com.exam.model.security;
 
 public class JwtResponse {
     String token;

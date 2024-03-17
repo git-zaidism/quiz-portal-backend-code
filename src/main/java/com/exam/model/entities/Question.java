@@ -1,4 +1,4 @@
-package com.exam.model.exam;
+package com.exam.model.entities;
 
 
 import lombok.AllArgsConstructor;
