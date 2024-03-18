@@ -1,4 +1,4 @@
-package com.exam.model.entities;
+package com.exam.model.exam;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class Quiz {
 
     private String maxMarks;
     private String numberOfQuestions;
-    private boolean active;
+    private boolean active = false;
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Category category;
