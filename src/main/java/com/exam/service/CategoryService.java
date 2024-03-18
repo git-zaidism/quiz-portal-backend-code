@@ -1,6 +1,6 @@
 package com.exam.service;
 
-import com.exam.model.entities.Category;
+import com.exam.model.exam.Category;
 
 import java.util.Set;
 

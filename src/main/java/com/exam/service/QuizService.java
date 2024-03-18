@@ -1,7 +1,8 @@
 package com.exam.service;
 
-import com.exam.model.entities.Category;
-import com.exam.model.entities.Quiz;
+import com.exam.model.exam.Category;
+import com.exam.model.exam.Quiz;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Set;

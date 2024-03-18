@@ -1,7 +1,7 @@
 package com.exam.service.impl;
 
-import com.exam.model.entities.Category;
-import com.exam.model.entities.Quiz;
+import com.exam.model.exam.Category;
+import com.exam.model.exam.Quiz;
 import com.exam.repo.QuizRepository;
 import com.exam.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;

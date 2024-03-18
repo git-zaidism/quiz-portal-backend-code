@@ -2,11 +2,12 @@ package com.exam.controller;
 
 import com.exam.config.JwtUtils;
 import com.exam.helper.UserNotFoundException;
-import com.exam.model.security.JwtRequest;
-import com.exam.model.security.JwtResponse;
-import com.exam.model.security.User;
+import com.exam.model.JwtRequest;
+import com.exam.model.JwtResponse;
+import com.exam.model.User;
 import com.exam.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
