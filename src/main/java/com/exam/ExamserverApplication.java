@@ -19,7 +19,7 @@ public class ExamserverApplication implements CommandLineRunner {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    public QuizRepository quizRepository;
+    public QuizRepository quizRepository; // test commit
 
     public static void main(String[] args) {
         SpringApplication.run(ExamserverApplication.class, args);
