@@ -27,7 +27,7 @@ public class UserController {
     public UserResponse createUser(@Valid @RequestBody UserCreateRequest request) {
         log.info("User creation requested for username={}", request.username());
         User user = this.userMapper.toEntity(request, this.passwordEncoder.encode(request.password()));
-        User createdUser = this.userService.createUser(user, this.userMapper.toDefaultNormalRoles(user));
+        User createdUser = this.userService.createUser(user, this.userMapper.toDefaultQuizzerRoles(user));
         log.info("User created successfully with userId={} username={}", createdUser.getId(), createdUser.getUsername());
         return this.userMapper.toResponse(createdUser);
     }

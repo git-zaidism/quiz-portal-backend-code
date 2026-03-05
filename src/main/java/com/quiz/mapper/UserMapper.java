@@ -27,12 +27,12 @@ public class UserMapper {
         return user;
     }
 
-    public Set<UserRole> toDefaultNormalRoles(User user) {
+    public Set<UserRole> toDefaultQuizzerRoles(User user) {
         Set<UserRole> userRoles = new HashSet<>();
 
         Role role = new Role();
-        role.setRoleId(UserDefaults.NORMAL_ROLE_ID);
-        role.setRoleName(UserDefaults.NORMAL_ROLE_NAME);
+        role.setRoleId(UserDefaults.QUIZZER_ROLE_ID);
+        role.setRoleName(UserDefaults.QUIZZER_ROLE_NAME);
 
         UserRole userRole = new UserRole();
         userRole.setUser(user);

@@ -9,7 +9,7 @@ public final class SecurityConstants {
     public static final String BEARER_PREFIX = "Bearer ";
 
     public static final String ROLE_PREFIX = "ROLE_";
-    public static final String ADMIN_ROLE = "ADMIN";
+    public static final String QUIZ_ADMIN_ROLE = "QUIZ_ADMIN";
 
     public static final String ANONYMOUS_USERNAME = "anonymousUser";
     public static final String SYSTEM_AUDITOR = "SYSTEM";

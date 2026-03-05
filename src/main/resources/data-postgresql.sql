@@ -56,13 +56,44 @@ UPDATE question SET updated_at = NOW() WHERE updated_at IS NULL;
 UPDATE question SET created_by = 'SYSTEM' WHERE created_by IS NULL;
 UPDATE question SET updated_by = 'SYSTEM' WHERE updated_by IS NULL;
 
--- Seed ADMIN role if missing
+-- Migrate legacy role names to new domain-specific names
+UPDATE roles
+SET role_name = 'QUIZ_ADMIN'
+WHERE role_id = 44
+  AND role_name <> 'QUIZ_ADMIN';
+
+UPDATE roles
+SET role_name = 'QUIZZER'
+WHERE role_id = 45
+  AND role_name <> 'QUIZZER';
+
+-- Fallback migration if old names exist with non-standard role ids
+UPDATE roles
+SET role_name = 'QUIZ_ADMIN'
+WHERE role_name = 'ADMIN'
+  AND NOT EXISTS (SELECT 1 FROM roles WHERE role_name = 'QUIZ_ADMIN');
+
+UPDATE roles
+SET role_name = 'QUIZZER'
+WHERE role_name = 'NORMAL'
+  AND NOT EXISTS (SELECT 1 FROM roles WHERE role_name = 'QUIZZER');
+
+-- Seed QUIZ_ADMIN role if missing
 INSERT INTO roles (role_id, role_name)
-SELECT 44, 'ADMIN'
+SELECT 44, 'QUIZ_ADMIN'
 WHERE NOT EXISTS (
   SELECT 1
   FROM roles
-  WHERE role_id = 44 OR role_name = 'ADMIN'
+  WHERE role_id = 44 OR role_name = 'QUIZ_ADMIN'
+);
+
+-- Seed QUIZZER role if missing
+INSERT INTO roles (role_id, role_name)
+SELECT 45, 'QUIZZER'
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM roles
+  WHERE role_id = 45 OR role_name = 'QUIZZER'
 );
 
 -- Seed admin user if missing
@@ -85,6 +116,26 @@ WHERE NOT EXISTS (
   WHERE username = 'admin'
 );
 
+-- Seed normal user if missing
+-- username: user
+-- password: admin123 (BCrypt)
+INSERT INTO users (id, username, password, first_name, last_name, email, phone, enabled, profile)
+SELECT
+  COALESCE((SELECT MAX(id) + 1 FROM users), 1),
+  'user',
+  '$2y$10$e0Dm.PrelTgEa7L3yUPOZuwdeM5XwXv/7HJ3dJnaRJlm7kPQVKQa6',
+  'Normal',
+  'User',
+  'user@example.com',
+  '',
+  true,
+  'default.png'
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM users
+  WHERE username = 'user'
+);
+
 -- If users.id has a sequence default, align it after manual insert
 SELECT setval(
   pg_get_serial_sequence('users', 'id'),
@@ -93,15 +144,31 @@ SELECT setval(
 )
 WHERE pg_get_serial_sequence('users', 'id') IS NOT NULL;
 
--- Link admin user to ADMIN role if missing
+-- Link admin user to QUIZ_ADMIN role if missing
 INSERT INTO user_role (user_role_id, user_id, role_role_id)
 SELECT
   COALESCE((SELECT MAX(user_role_id) + 1 FROM user_role), 1),
   u.id,
   r.role_id
 FROM users u
-JOIN roles r ON r.role_name = 'ADMIN'
+JOIN roles r ON r.role_name = 'QUIZ_ADMIN'
 WHERE u.username = 'admin'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM user_role ur
+    WHERE ur.user_id = u.id
+      AND ur.role_role_id = r.role_id
+  );
+
+-- Link normal user to QUIZZER role if missing
+INSERT INTO user_role (user_role_id, user_id, role_role_id)
+SELECT
+  COALESCE((SELECT MAX(user_role_id) + 1 FROM user_role), 1),
+  u.id,
+  r.role_id
+FROM users u
+JOIN roles r ON r.role_name = 'QUIZZER'
+WHERE u.username = 'user'
   AND NOT EXISTS (
     SELECT 1
     FROM user_role ur

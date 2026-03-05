@@ -15,6 +15,6 @@ public final class SecurityUtils {
         String normalizedAuthority = authority.startsWith(SecurityConstants.ROLE_PREFIX)
                 ? authority.substring(SecurityConstants.ROLE_PREFIX.length())
                 : authority;
-        return SecurityConstants.ADMIN_ROLE.equalsIgnoreCase(normalizedAuthority);
+        return SecurityConstants.QUIZ_ADMIN_ROLE.equalsIgnoreCase(normalizedAuthority);
     }
 }
