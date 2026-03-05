@@ -7,6 +7,7 @@ import com.quiz.entities.Quiz;
 import com.quiz.repositoy.QuestionRepository;
 import com.quiz.service.QuestionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,64 +20,88 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
 
     @Override
     public Question createQuestion(Question question) {
-        return this.questionRepository.save(question);
+        log.info("Creating question for quizId={}",
+                question.getQuiz() != null ? question.getQuiz().getId() : null);
+        Question createdQuestion = this.questionRepository.save(question);
+        log.info("Question created successfully questionId={}", createdQuestion.getId());
+        return createdQuestion;
     }
 
     @Override
     public Question updateQuestion(Question question) {
-        return this.questionRepository.save(question);
+        log.info("Updating question questionId={}", question.getId());
+        Question updatedQuestion = this.questionRepository.save(question);
+        log.info("Question updated successfully questionId={}", updatedQuestion.getId());
+        return updatedQuestion;
     }
 
     @Override
     public Set<Question> getAllQuestions() {
-        return new HashSet<>(this.questionRepository.findAll());
+        Set<Question> questions = new HashSet<>(this.questionRepository.findAll());
+        log.debug("Loaded {} questions", questions.size());
+        return questions;
     }
 
     @Override
     public Question getQuestionById(Long questionId) {
+        log.debug("Loading question by questionId={}", questionId);
         return this.questionRepository.findById(questionId)
                 .orElseThrow(() -> new NoSuchElementException("Question not found with id: " + questionId));
     }
 
     @Override
     public Set<Question> getQuestionsByQuiz(Quiz quiz) {
-        return this.questionRepository.findByQuiz(quiz);
+        Set<Question> questions = this.questionRepository.findByQuiz(quiz);
+        log.debug("Loaded {} questions for quizId={}", questions.size(), quiz.getId());
+        return questions;
     }
 
     @Override
     public void deleteQuestionById(Long questionId) {
+        log.info("Deleting question questionId={}", questionId);
         if (!this.questionRepository.existsById(questionId)) {
+            log.warn("Question deletion failed, questionId not found: {}", questionId);
             throw new NoSuchElementException("Question not found with id: " + questionId);
         }
         this.questionRepository.deleteById(questionId);
+        log.info("Question deleted successfully questionId={}", questionId);
     }
 
     @Override
     public List<Question> getQuestionsForQuizAttempt(Quiz quiz) {
+        log.debug("Preparing randomized questions for quizId={}", quiz.getId());
         List<Question> questions = new ArrayList<>(quiz.getQuestions());
         int maxQuestionCount;
         try {
             maxQuestionCount = Integer.parseInt(quiz.getNumberOfQuestions());
         } catch (NumberFormatException exception) {
+            log.warn("Invalid numberOfQuestions for quizId={} value={}", quiz.getId(), quiz.getNumberOfQuestions());
             throw new IllegalArgumentException("Number of questions must be numeric.");
         }
 
         Collections.shuffle(questions);
         if (questions.size() <= maxQuestionCount) {
+            log.debug("Returning all {} questions for quizId={}", questions.size(), quiz.getId());
             return questions;
         }
-        return questions.subList(0, maxQuestionCount);
+        List<Question> selectedQuestions = questions.subList(0, maxQuestionCount);
+        log.debug("Returning {} out of {} questions for quizId={}",
+                selectedQuestions.size(), questions.size(), quiz.getId());
+        return selectedQuestions;
     }
 
     @Override
     public QuizEvaluationResponse evaluateQuiz(List<QuestionEvaluationRequest> submissions) {
+        log.info("Evaluating quiz with {} submissions", submissions == null ? 0 : submissions.size());
         if (submissions == null || submissions.isEmpty()) {
+            log.debug("Evaluation request has no submissions");
             return new QuizEvaluationResponse(0, 0, 0);
         }
 
@@ -89,6 +114,8 @@ public class QuestionServiceImpl implements QuestionService {
         try {
             maxMarks = Double.parseDouble(firstQuestion.getQuiz().getMaxMarks());
         } catch (NumberFormatException exception) {
+            log.warn("Invalid maxMarks configured for quizId={} value={}",
+                    firstQuestion.getQuiz().getId(), firstQuestion.getQuiz().getMaxMarks());
             throw new IllegalArgumentException("Quiz max marks must be numeric.");
         }
         double marksPerQuestion = maxMarks / submissions.size();
@@ -106,6 +133,8 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
 
+        log.info("Quiz evaluation completed: marksObtained={}, correctAnswers={}, attempted={}",
+                marksObtained, correctAnswers, attempted);
         return new QuizEvaluationResponse(marksObtained, correctAnswers, attempted);
     }
 }

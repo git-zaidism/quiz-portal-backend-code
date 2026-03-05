@@ -1,4 +1,4 @@
-package com.quiz.config;
+package com.quiz.config.security;
 
 import com.quiz.constants.ApiPathConstants;
 import com.quiz.service.impl.UserDetailsServiceImpl;

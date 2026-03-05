@@ -1,4 +1,4 @@
-package com.quiz.config;
+package com.quiz.config.jpa;
 
 import com.quiz.constants.SecurityConstants;
 import org.springframework.context.annotation.Bean;

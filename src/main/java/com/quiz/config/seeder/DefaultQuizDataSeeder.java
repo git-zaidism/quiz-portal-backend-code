@@ -1,4 +1,4 @@
-package com.quiz.config;
+package com.quiz.config.seeder;
 
 import com.quiz.entities.Category;
 import com.quiz.entities.Question;
@@ -9,6 +9,7 @@ import com.quiz.repositoy.QuizRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultQuizDataSeeder implements CommandLineRunner {
 
     private static final int MIN_QUESTIONS_PER_QUIZ = 30;
@@ -38,6 +40,7 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        log.info("Starting default quiz data seeding");
         Category sqlCategory = getOrCreateCategory("SQL", "Structured Query Language quizzes");
         Category javaCategory = getOrCreateCategory("Java", "Core Java programming quizzes");
 
@@ -59,6 +62,7 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
 
         syncQuizQuestions(sqlQuiz, loadSeedQuestions("seed/sql-questions.json"));
         syncQuizQuestions(javaQuiz, loadSeedQuestions("seed/java-questions.json"));
+        log.info("Default quiz data seeding completed");
     }
 
     private Category getOrCreateCategory(String title, String description) {
@@ -67,6 +71,7 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                         && existingCategory.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .map(existing -> {
+                    log.debug("Updating existing category title={} categoryId={}", title, existing.getId());
                     existing.setDescription(description);
                     return categoryRepository.save(existing);
                 })
@@ -74,7 +79,9 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                     Category category = new Category();
                     category.setTitle(title);
                     category.setDescription(description);
-                    return categoryRepository.save(category);
+                    Category createdCategory = categoryRepository.save(category);
+                    log.info("Created default category title={} categoryId={}", title, createdCategory.getId());
+                    return createdCategory;
                 });
     }
 
@@ -90,6 +97,7 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                         && Objects.equals(existingQuiz.getCategory().getId(), category.getId()))
                 .findFirst()
                 .map(existing -> {
+                    log.debug("Updating existing quiz title={} quizId={}", title, existing.getId());
                     existing.setDescription(description);
                     existing.setMaxMarks(maxMarks);
                     existing.setNumberOfQuestions(numberOfQuestions);
@@ -104,15 +112,19 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                     quiz.setNumberOfQuestions(numberOfQuestions);
                     quiz.setActive(true);
                     quiz.setCategory(category);
-                    return quizRepository.save(quiz);
+                    Quiz createdQuiz = quizRepository.save(quiz);
+                    log.info("Created default quiz title={} quizId={}", title, createdQuiz.getId());
+                    return createdQuiz;
                 });
     }
 
     private List<SeedQuestion> loadSeedQuestions(String classpathResource) {
         try (InputStream inputStream = new ClassPathResource(classpathResource).getInputStream()) {
             SeedQuestion[] questions = objectMapper.readValue(inputStream, SeedQuestion[].class);
+            log.debug("Loaded {} seed questions from {}", questions.length, classpathResource);
             return Arrays.asList(questions);
         } catch (IOException exception) {
+            log.error("Failed to load seed questions from {}", classpathResource, exception);
             throw new IllegalStateException("Unable to load quiz seed file: " + classpathResource, exception);
         }
     }
@@ -129,6 +141,7 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (existing.size() == desired.size() && existingSignature.equals(desiredSignature)) {
+            log.debug("Quiz question set already up-to-date for quizId={}", quiz.getId());
             return;
         }
 
@@ -151,6 +164,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
             questionRepository.flush();
         }
         questionRepository.saveAll(newQuestions);
+        log.info("Synchronized quiz questions for quizId={} oldCount={} newCount={}",
+                quiz.getId(), existing.size(), newQuestions.size());
     }
 
     private List<SeedQuestion> buildDesiredSeedSet(Quiz quiz, List<SeedQuestion> source) {

@@ -1,4 +1,4 @@
-package com.quiz.config;
+package com.quiz.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

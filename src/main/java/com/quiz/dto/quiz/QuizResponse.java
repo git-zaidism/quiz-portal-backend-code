@@ -1,9 +1,7 @@
 package com.quiz.dto.quiz;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public record QuizResponse(
-        @JsonProperty("qId") Long quizId,
+        Long quizId,
         String title,
         String description,
         String maxMarks,

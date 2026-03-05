@@ -12,6 +12,7 @@ import com.quiz.service.QuestionService;
 import com.quiz.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import java.util.Set;
 @CrossOrigin("*")
 @RequestMapping("/question")
 @RequiredArgsConstructor
+@Slf4j
 public class QuestionController {
 
     private final QuestionService questionService;
@@ -31,11 +33,13 @@ public class QuestionController {
 
     @PostMapping
     public ResponseEntity<QuestionResponse> createQuestion(@Valid @RequestBody QuestionRequest request) {
+        log.info("Question creation requested for quizId={}", request.quizId());
         return ResponseEntity.ok(this.questionMapper.toResponse(this.questionService.createQuestion(this.questionMapper.toEntity(request))));
     }
 
     @PutMapping
     public ResponseEntity<QuestionResponse> updateQuestion(@Valid @RequestBody QuestionRequest request) {
+        log.info("Question update requested questionId={}", request.questionId());
         return ResponseEntity.ok(this.questionMapper.toResponse(this.questionService.updateQuestion(this.questionMapper.toEntity(request))));
     }
 
@@ -44,6 +48,7 @@ public class QuestionController {
         Quiz quiz = this.quizService.getQuizById(quizId);
         List<Question> questions = this.questionService.getQuestionsForQuizAttempt(quiz);
         List<QuestionPublicResponse> questionResponses = questions.stream().map(this.questionMapper::toPublicResponse).toList();
+        log.debug("Prepared {} questions for quiz attempt quizId={}", questionResponses.size(), quizId);
         return ResponseEntity.ok(questionResponses);
     }
 
@@ -51,23 +56,27 @@ public class QuestionController {
     public ResponseEntity<List<QuestionResponse>> getQuestionsByQuizForAdmin(@PathVariable("quizId") Long quizId) {
         Set<Question> questions = this.questionService.getQuestionsByQuiz(this.questionMapper.toQuizReference(quizId));
         List<QuestionResponse> questionResponses = questions.stream().map(this.questionMapper::toResponse).toList();
+        log.debug("Fetched {} questions for admin quizId={}", questionResponses.size(), quizId);
         return ResponseEntity.ok(questionResponses);
     }
 
     @GetMapping("/{questionId}")
     public QuestionResponse getQuestionById(@PathVariable("questionId") Long questionId) {
+        log.debug("Fetching question by questionId={}", questionId);
         return this.questionMapper.toResponse(this.questionService.getQuestionById(questionId));
     }
 
     @DeleteMapping("/{questionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteQuestionById(@PathVariable("questionId") Long questionId) {
+        log.info("Question deletion requested questionId={}", questionId);
         this.questionService.deleteQuestionById(questionId);
     }
 
     @PostMapping("/eval-quiz")
     public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
             @Valid @RequestBody List<@Valid QuestionEvaluationRequest> evaluationRequests) {
+        log.info("Quiz evaluation requested with {} submissions", evaluationRequests.size());
         return ResponseEntity.ok(this.questionService.evaluateQuiz(evaluationRequests));
     }
 }
