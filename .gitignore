@@ -1,0 +1,42 @@
+# Maven / Java
+/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+/.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+logs/
+*.tmp
+
+# Environment / secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Runtime uploads
+/uploads/*
+!/uploads/.gitkeep
+
+# Spring Boot local config overrides
+application-local.properties
+application-local.yml
+
+# Maven wrapper cache
+.mvn/wrapper/maven-wrapper.jar
