@@ -2,23 +2,6 @@
 
 A comprehensive REST API backend for a Quiz/Exam portal platform built with Spring Boot 4.0. This application provides complete CRUD operations for managing quizzes, categories, questions, users, and user authentication with JWT-based security.
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Tech Stack](#tech-stack)
-- [Architecture & Mechanisms](#architecture--mechanisms)
-- [Prerequisites](#prerequisites)
-- [Installation & Setup](#installation--setup)
-- [Running the Application](#running-the-application)
-- [API Documentation](#api-documentation)
-- [Database Schema](#database-schema)
-- [Configuration](#configuration)
-- [Data Seeding](#data-seeding)
-- [Security](#security)
-- [Maven Commands](#maven-commands)
-- [Project Structure](#project-structure)
-- [API Endpoints](#api-endpoints)
-
 ## Project Overview
 
 The Quiz Portal Backend is a full-featured examination and quiz management system that allows:
