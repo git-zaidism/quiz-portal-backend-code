@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/exam}
+    username: ${DB_USERNAME:exam_user}
+    password: ${DB_PASSWORD:exam_password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+
+logging:
+  level:
+    root: INFO
+    com.quiz: DEBUG
+    org.springframework.security: INFO
