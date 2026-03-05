@@ -1,8 +1,9 @@
-package com.exam.model;
+package com.exam.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class User extends AuditableEntity implements UserDetails {
@@ -31,40 +33,9 @@ public class User extends AuditableEntity implements UserDetails {
     private boolean enabled = true;
     private String profile;
 
-    //user many roles
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
-
-    public User() {
-    }
-
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-
-    public User(Long id, String username, String password, String firstName, String lastName, String email, String phone, boolean enabled, String profile) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phone = phone;
-        this.enabled = enabled;
-        this.profile = profile;
-    }
-
-
-    public void setProfile(String profile) {
-        this.profile = profile;
-    }
-
-    public String getUsername() {
-        return username;
-    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -81,25 +52,17 @@ public class User extends AuditableEntity implements UserDetails {
         return true;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<Authority> set = new HashSet<>();
+        Set<Authority> authorities = new HashSet<>();
         this.userRoles.forEach(userRole -> {
-            set.add(new Authority(userRole.getRole().getRoleName()));
+            authorities.add(new Authority(userRole.getRole().getRoleName()));
         });
-        return set;
+        return authorities;
     }
 
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public boolean isEnabled() {

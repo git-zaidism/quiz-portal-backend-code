@@ -1,28 +1,26 @@
 package com.exam.service;
 
-import com.exam.model.exam.Category;
-import com.exam.model.exam.Quiz;
-import org.springframework.http.ResponseEntity;
+import com.exam.entities.Category;
+import com.exam.entities.Quiz;
 
 import java.util.List;
 import java.util.Set;
 
 public interface QuizService {
 
-    public Quiz addQuiz(Quiz quiz);
+    Quiz createQuiz(Quiz quiz);
 
-    public Quiz updateQuiz(Quiz quiz);
+    Quiz updateQuiz(Quiz quiz);
 
-    public Set<Quiz> getQuizzes();
+    Set<Quiz> getAllQuizzes();
 
-    public Quiz getQuiz(Long quizId);
+    Quiz getQuizById(Long quizId);
 
-    public void deleteQuiz(Long quizId);
+    void deleteQuizById(Long quizId);
 
+    List<Quiz> getQuizzesByCategory(Category category);
 
-    public List<Quiz> getQuizzesOfCategory(Category category);
+    List<Quiz> getAllActiveQuizzes();
 
-    public List<Quiz> getActiveQuizzes();
-
-    public List<Quiz> getActiveQuizzesOfCategory(Category c);
+    List<Quiz> getActiveQuizzesByCategory(Category category);
 }

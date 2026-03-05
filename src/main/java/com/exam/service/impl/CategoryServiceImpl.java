@@ -1,22 +1,23 @@
 package com.exam.service.impl;
 
-import com.exam.model.exam.Category;
+import com.exam.entities.Category;
 import com.exam.repo.CategoryRepository;
 import com.exam.service.CategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
-    public Category addCategory(Category category) {
+    public Category createCategory(Category category) {
         return this.categoryRepository.save(category);
     }
 
@@ -26,19 +27,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Set<Category> getCategories() {
+    public Set<Category> getAllCategories() {
         return new LinkedHashSet<>(this.categoryRepository.findAll());
     }
 
     @Override
-    public Category getCategory(Long categoryId) {
-        return this.categoryRepository.findById(categoryId).get();
+    public Category getCategoryById(Long categoryId) {
+        return this.categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + categoryId));
     }
 
     @Override
-    public void deleteCategory(Long categoryId) {
-        Category category = new Category();
-        category.setCid(categoryId);
-        this.categoryRepository.delete(category);
+    public void deleteCategoryById(Long categoryId) {
+        if (!this.categoryRepository.existsById(categoryId)) {
+            throw new NoSuchElementException("Category not found with id: " + categoryId);
+        }
+        this.categoryRepository.deleteById(categoryId);
     }
 }

@@ -1,25 +1,27 @@
 package com.exam.service.impl;
 
-import com.exam.model.exam.Category;
-import com.exam.model.exam.Quiz;
+import com.exam.entities.Category;
+import com.exam.entities.Quiz;
 import com.exam.repo.QuizRepository;
 import com.exam.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService {
-    @Autowired
-    private QuizRepository quizRepository;
+
+    private final QuizRepository quizRepository;
 
     @Override
-    public Quiz addQuiz(Quiz quiz) {
+    public Quiz createQuiz(Quiz quiz) {
         return this.quizRepository.save(quiz);
     }
 
@@ -29,36 +31,37 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Set<Quiz> getQuizzes() {
+    public Set<Quiz> getAllQuizzes() {
         return new HashSet<>(this.quizRepository.findAll());
     }
 
     @Override
-    public Quiz getQuiz(Long quizId) {
-        return this.quizRepository.findById(quizId).get();
+    public Quiz getQuizById(Long quizId) {
+        return this.quizRepository.findById(quizId)
+                .orElseThrow(() -> new NoSuchElementException("Quiz not found with id: " + quizId));
     }
 
     @Override
-    public void deleteQuiz(Long quizId) {
+    public void deleteQuizById(Long quizId) {
+        if (!this.quizRepository.existsById(quizId)) {
+            throw new NoSuchElementException("Quiz not found with id: " + quizId);
+        }
         this.quizRepository.deleteById(quizId);
     }
 
     @Override
-    public List<Quiz> getQuizzesOfCategory(Category category) {
-        return this.quizRepository.findBycategory(category);
+    public List<Quiz> getQuizzesByCategory(Category category) {
+        return this.quizRepository.findByCategory(category);
     }
 
 
-    //get active quizzes
-
     @Override
-    public List<Quiz> getActiveQuizzes() {
+    public List<Quiz> getAllActiveQuizzes() {
         return this.quizRepository.findByActive(true);
     }
 
     @Override
-    public List<Quiz> getActiveQuizzesOfCategory(Category c) {
-        return this.quizRepository.findByCategoryAndActive(c, true);
+    public List<Quiz> getActiveQuizzesByCategory(Category category) {
+        return this.quizRepository.findByCategoryAndActive(category, true);
     }
-
 }

@@ -13,7 +13,8 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtils {
-    private String SECRET_KEY = "examportal";
+
+    private static final String SECRET_KEY = "examportal";
     private static final long TOKEN_VALIDITY_MINUTES = 600L;
 
     public String extractUsername(String token) {
@@ -33,7 +34,7 @@ public class JwtUtils {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -53,7 +54,7 @@ public class JwtUtils {
         return TOKEN_VALIDITY_MINUTES;
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }

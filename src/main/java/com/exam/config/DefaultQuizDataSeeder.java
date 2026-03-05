@@ -1,13 +1,14 @@
 package com.exam.config;
 
-import com.exam.model.exam.Category;
-import com.exam.model.exam.Question;
-import com.exam.model.exam.Quiz;
+import com.exam.entities.Category;
+import com.exam.entities.Question;
+import com.exam.entities.Quiz;
 import com.exam.repo.CategoryRepository;
 import com.exam.repo.QuestionRepository;
 import com.exam.repo.QuizRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class DefaultQuizDataSeeder implements CommandLineRunner {
 
     private static final int MIN_QUESTIONS_PER_QUIZ = 30;
@@ -32,14 +34,6 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public DefaultQuizDataSeeder(CategoryRepository categoryRepository,
-                                 QuizRepository quizRepository,
-                                 QuestionRepository questionRepository) {
-        this.categoryRepository = categoryRepository;
-        this.quizRepository = quizRepository;
-        this.questionRepository = questionRepository;
-    }
 
     @Override
     @Transactional
@@ -69,7 +63,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
 
     private Category getOrCreateCategory(String title, String description) {
         return categoryRepository.findAll().stream()
-                .filter(c -> c.getTitle() != null && c.getTitle().equalsIgnoreCase(title))
+                .filter(existingCategory -> existingCategory.getTitle() != null
+                        && existingCategory.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .map(existing -> {
                     existing.setDescription(description);
@@ -89,8 +84,10 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                                          String maxMarks,
                                          String numberOfQuestions) {
         return quizRepository.findAll().stream()
-                .filter(q -> q.getTitle() != null && q.getTitle().equalsIgnoreCase(title))
-                .filter(q -> q.getCategory() != null && Objects.equals(q.getCategory().getCid(), category.getCid()))
+                .filter(existingQuiz -> existingQuiz.getTitle() != null
+                        && existingQuiz.getTitle().equalsIgnoreCase(title))
+                .filter(existingQuiz -> existingQuiz.getCategory() != null
+                        && Objects.equals(existingQuiz.getCategory().getId(), category.getId()))
                 .findFirst()
                 .map(existing -> {
                     existing.setDescription(description);
@@ -115,8 +112,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
         try (InputStream inputStream = new ClassPathResource(classpathResource).getInputStream()) {
             SeedQuestion[] questions = objectMapper.readValue(inputStream, SeedQuestion[].class);
             return Arrays.asList(questions);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to load quiz seed file: " + classpathResource, e);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to load quiz seed file: " + classpathResource, exception);
         }
     }
 
@@ -177,14 +174,14 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
         return desired;
     }
 
-    private String signature(Question q) {
+    private String signature(Question question) {
         return signature(new SeedQuestion(
-                q.getContent(),
-                q.getOption1(),
-                q.getOption2(),
-                q.getOption3(),
-                q.getOption4(),
-                q.getAnswer(),
+                question.getContent(),
+                question.getOption1(),
+                question.getOption2(),
+                question.getOption3(),
+                question.getOption4(),
+                question.getAnswer(),
                 null,
                 null,
                 null,
@@ -192,13 +189,13 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
         ));
     }
 
-    private String signature(SeedQuestion q) {
-        return normalize(q.content()) + "|" +
-                normalize(q.option1()) + "|" +
-                normalize(q.option2()) + "|" +
-                normalize(q.option3()) + "|" +
-                normalize(q.option4()) + "|" +
-                normalize(q.answer());
+    private String signature(SeedQuestion question) {
+        return normalize(question.content()) + "|" +
+                normalize(question.option1()) + "|" +
+                normalize(question.option2()) + "|" +
+                normalize(question.option3()) + "|" +
+                normalize(question.option4()) + "|" +
+                normalize(question.answer());
     }
 
     private String normalize(String value) {

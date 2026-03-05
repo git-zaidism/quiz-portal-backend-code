@@ -1,24 +1,29 @@
 package com.exam.service;
 
-import com.exam.model.exam.Question;
-import com.exam.model.exam.Quiz;
+import com.exam.dto.question.QuestionEvaluationRequest;
+import com.exam.dto.question.QuizEvaluationResponse;
+import com.exam.entities.Question;
+import com.exam.entities.Quiz;
 
+import java.util.List;
 import java.util.Set;
 
 public interface QuestionService {
 
-    public Question addQuestion(Question question);
+    Question createQuestion(Question question);
 
-    public Question updateQuestion(Question question);
+    Question updateQuestion(Question question);
 
-    public Set<Question> getQuestions();
+    Set<Question> getAllQuestions();
 
-    public Question getQuestion(Long questionId);
+    Question getQuestionById(Long questionId);
 
-    public Set<Question> getQuestionsOfQuiz(Quiz quiz);
+    Set<Question> getQuestionsByQuiz(Quiz quiz);
 
-    public void deleteQuestion(Long quesId);
+    void deleteQuestionById(Long questionId);
 
-    public Question get(Long questionsId);
+    List<Question> getQuestionsForQuizAttempt(Quiz quiz);
+
+    QuizEvaluationResponse evaluateQuiz(List<QuestionEvaluationRequest> submissions);
 
 }

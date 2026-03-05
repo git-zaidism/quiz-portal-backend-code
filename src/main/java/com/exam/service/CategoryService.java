@@ -1,17 +1,17 @@
 package com.exam.service;
 
-import com.exam.model.exam.Category;
+import com.exam.entities.Category;
 
 import java.util.Set;
 
 public interface CategoryService {
-    public Category addCategory(Category category);
+    Category createCategory(Category category);
 
-    public Category updateCategory(Category category);
+    Category updateCategory(Category category);
 
-    public Set<Category> getCategories();
+    Set<Category> getAllCategories();
 
-    public Category getCategory(Long categoryId);
+    Category getCategoryById(Long categoryId);
 
-    public void deleteCategory(Long categoryId);
+    void deleteCategoryById(Long categoryId);
 }

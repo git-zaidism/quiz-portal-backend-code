@@ -1,62 +1,51 @@
 package com.exam.service.impl;
 
-import com.exam.helper.UserFoundException;
-import com.exam.helper.UserNotFoundException;
-import com.exam.model.Role;
-import com.exam.model.User;
-import com.exam.model.UserRole;
+import com.exam.exception.UserFoundException;
+import com.exam.exception.UserNotFoundException;
+import com.exam.entities.User;
+import com.exam.entities.UserRole;
 import com.exam.repo.RoleRepository;
 import com.exam.repo.UserRepository;
 import com.exam.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    //creating user
     @Override
-    public User createUser(User user, Set<UserRole> userRoles) throws Exception {
-
-
-        User local = this.userRepository.findByUsername(user.getUsername());
-        if (local != null) {
-            System.out.println("User is already there !!");
+    public User createUser(User user, Set<UserRole> userRoles) {
+        if (this.userRepository.existsByUsername(user.getUsername())) {
             throw new UserFoundException();
-        } else {
-            //user create
-            for (UserRole ur : userRoles) {
-                roleRepository.save(ur.getRole());
-            }
-
-            user.getUserRoles().addAll(userRoles);
-            local = this.userRepository.save(user);
-
         }
 
-        return local;
+        userRoles.stream()
+                .map(UserRole::getRole)
+                .filter(Objects::nonNull)
+                .forEach(this.roleRepository::save);
+
+        user.getUserRoles().addAll(userRoles);
+        return this.userRepository.save(user);
     }
 
-    //getting user by username
     @Override
-    public User getUser(String username) {
-        return this.userRepository.findByUsername(username);
+    public User getUserByUsername(String username) {
+        return this.userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
     }
 
     @Override
-    public void deleteUser(Long userId) {
+    public void deleteUserById(Long userId) {
+        if (!this.userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User not found with id: " + userId);
+        }
         this.userRepository.deleteById(userId);
     }
-
-
 }

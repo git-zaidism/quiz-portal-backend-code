@@ -1,16 +1,14 @@
 package com.exam.repo;
 
-import com.exam.model.exam.Category;
-import com.exam.model.exam.Quiz;
+import com.exam.entities.Category;
+import com.exam.entities.Quiz;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
-    public List<Quiz> findBycategory(Category category);
+    List<Quiz> findByCategory(Category category);
 
-    public List<Quiz> findByActive(Boolean b);
+    List<Quiz> findByActive(boolean active);
 
-    public List<Quiz> findByCategoryAndActive(Category c, Boolean b);
+    List<Quiz> findByCategoryAndActive(Category category, boolean active);
 }
