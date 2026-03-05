@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -62,8 +63,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                 String.valueOf(MIN_QUESTIONS_PER_QUIZ)
         );
 
-        ensureMinimumQuestions(sqlQuiz, loadSeedQuestions("seed/sql-questions.json"));
-        ensureMinimumQuestions(javaQuiz, loadSeedQuestions("seed/java-questions.json"));
+        syncQuizQuestions(sqlQuiz, loadSeedQuestions("seed/sql-questions.json"));
+        syncQuizQuestions(javaQuiz, loadSeedQuestions("seed/java-questions.json"));
     }
 
     private Category getOrCreateCategory(String title, String description) {
@@ -119,28 +120,23 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
         }
     }
 
-    private void ensureMinimumQuestions(Quiz quiz, List<SeedQuestion> seedQuestions) {
+    private void syncQuizQuestions(Quiz quiz, List<SeedQuestion> seedQuestions) {
         Set<Question> existing = questionRepository.findByQuiz(quiz);
-        if (existing.size() >= MIN_QUESTIONS_PER_QUIZ) {
+        List<SeedQuestion> desired = buildDesiredSeedSet(quiz, seedQuestions);
+
+        Set<String> existingSignature = existing.stream()
+                .map(this::signature)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<String> desiredSignature = desired.stream()
+                .map(this::signature)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (existing.size() == desired.size() && existingSignature.equals(desiredSignature)) {
             return;
         }
 
-        Set<String> existingContent = existing.stream()
-                .map(Question::getContent)
-                .filter(Objects::nonNull)
-                .map(this::normalize)
-                .collect(Collectors.toSet());
-
-        int needed = MIN_QUESTIONS_PER_QUIZ - existing.size();
         List<Question> newQuestions = new ArrayList<>();
-
-        for (SeedQuestion seed : seedQuestions) {
-            if (needed == 0) {
-                break;
-            }
-            if (existingContent.contains(normalize(seed.content()))) {
-                continue;
-            }
+        for (SeedQuestion seed : desired) {
             Question question = new Question();
             question.setContent(seed.content());
             question.setOption1(seed.option1());
@@ -151,29 +147,56 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
             question.setImage("");
             question.setQuiz(quiz);
             newQuestions.add(question);
-            needed--;
         }
 
-        int index = 1;
-        while (needed > 0) {
-            Question question = new Question();
-            question.setContent(quiz.getTitle() + " extra question " + index);
-            question.setOption1("Option A");
-            question.setOption2("Option B");
-            question.setOption3("Option C");
-            question.setOption4("Option D");
-            question.setAnswer("Option A");
-            question.setImage("");
-            question.setQuiz(quiz);
-            newQuestions.add(question);
-            index++;
-            needed--;
+        if (!existing.isEmpty()) {
+            questionRepository.deleteAll(existing);
+            questionRepository.flush();
         }
-
         questionRepository.saveAll(newQuestions);
     }
 
+    private List<SeedQuestion> buildDesiredSeedSet(Quiz quiz, List<SeedQuestion> source) {
+        List<SeedQuestion> desired = new ArrayList<>(source);
+        int index = 1;
+        while (desired.size() < MIN_QUESTIONS_PER_QUIZ) {
+            desired.add(new SeedQuestion(
+                    quiz.getTitle() + " extra question " + index,
+                    "Option A",
+                    "Option B",
+                    "Option C",
+                    "Option D",
+                    "Option A"
+            ));
+            index++;
+        }
+        return desired;
+    }
+
+    private String signature(Question q) {
+        return signature(new SeedQuestion(
+                q.getContent(),
+                q.getOption1(),
+                q.getOption2(),
+                q.getOption3(),
+                q.getOption4(),
+                q.getAnswer()
+        ));
+    }
+
+    private String signature(SeedQuestion q) {
+        return normalize(q.content()) + "|" +
+                normalize(q.option1()) + "|" +
+                normalize(q.option2()) + "|" +
+                normalize(q.option3()) + "|" +
+                normalize(q.option4()) + "|" +
+                normalize(q.answer());
+    }
+
     private String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
         return value.trim().toLowerCase(Locale.ROOT);
     }
 

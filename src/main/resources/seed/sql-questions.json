@@ -1,5 +1,5 @@
 [
-  {"content":"What does SQL stand for?","option1":"Structured Query Language","option2":"Simple Query Language","option3":"System Query Logic","option4":"Sequential Query Language","answer":"Structured Query Language"},
+  {"content":"What does SQL stand for?","option1":"Structured Query Language","option2":"Simple Query Language","option3":"System Query Language","option4":"Sequential Query Language","answer":"Structured Query Language"},
   {"content":"Which command is used to retrieve rows from a table?","option1":"GET","option2":"FETCH","option3":"SELECT","option4":"READ","answer":"SELECT"},
   {"content":"Which SQL clause is used to filter rows?","option1":"ORDER BY","option2":"GROUP BY","option3":"HAVING","option4":"WHERE","answer":"WHERE"},
   {"content":"Which command adds a new row into a table?","option1":"ADD","option2":"INSERT","option3":"APPEND","option4":"CREATE","answer":"INSERT"},
