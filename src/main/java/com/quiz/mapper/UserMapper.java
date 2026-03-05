@@ -1,6 +1,7 @@
 package com.quiz.mapper;
 
 import com.quiz.constants.UserDefaults;
+import com.quiz.dto.user.AuthorityResponse;
 import com.quiz.dto.user.UserCreateRequest;
 import com.quiz.dto.user.UserResponse;
 import com.quiz.entities.Role;
@@ -9,6 +10,7 @@ import com.quiz.entities.UserRole;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,11 @@ public class UserMapper {
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
 
+        Set<AuthorityResponse> authorities = roles.stream()
+                .map(this::toLegacyAuthorityName)
+                .map(AuthorityResponse::new)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
         return new UserResponse(
                 user.getId(),
                 user.getUsername(),
@@ -57,7 +64,18 @@ public class UserMapper {
                 user.getPhone(),
                 user.isEnabled(),
                 user.getProfile(),
-                roles
+                roles,
+                authorities
         );
+    }
+
+    private String toLegacyAuthorityName(String roleName) {
+        if ("QUIZ_ADMIN".equalsIgnoreCase(roleName)) {
+            return "ADMIN";
+        }
+        if ("QUIZZER".equalsIgnoreCase(roleName)) {
+            return "NORMAL";
+        }
+        return roleName;
     }
 }

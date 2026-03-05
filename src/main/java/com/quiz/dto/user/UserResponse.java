@@ -11,6 +11,7 @@ public record UserResponse(
         String phone,
         boolean enabled,
         String profile,
-        Set<String> roles
+        Set<String> roles,
+        Set<AuthorityResponse> authorities
 ) {
 }
