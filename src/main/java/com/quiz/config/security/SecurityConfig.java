@@ -1,7 +1,5 @@
 package com.quiz.config.security;
 
-import com.quiz.constants.ApiPathConstants;
-import com.quiz.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +14,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.quiz.constants.ApiPathConstants;
+import com.quiz.service.impl.UserDetailsServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
@@ -54,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(ApiPathConstants.GENERATE_TOKEN, ApiPathConstants.GENERATE_ADMIN_TOKEN).permitAll()
                         .requestMatchers(HttpMethod.POST, ApiPathConstants.USER_BASE, ApiPathConstants.USER_BASE_WITH_SLASH).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Swagger UI and OpenAPI documentation paths
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandlingConfigurer ->
                         exceptionHandlingConfigurer.authenticationEntryPoint(this.unauthorizedHandler))
