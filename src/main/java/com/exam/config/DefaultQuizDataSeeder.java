@@ -166,7 +166,9 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                     "Option B",
                     "Option C",
                     "Option D",
-                    "Option A"
+                    "Option A",
+                    null,
+                    null
             ));
             index++;
         }
@@ -180,7 +182,9 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                 q.getOption2(),
                 q.getOption3(),
                 q.getOption4(),
-                q.getAnswer()
+                q.getAnswer(),
+                null,
+                null
         ));
     }
 
@@ -200,6 +204,13 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
         return value.trim().toLowerCase(Locale.ROOT);
     }
 
-    private record SeedQuestion(String content, String option1, String option2, String option3, String option4, String answer) {
+    private record SeedQuestion(String content,
+                                String option1,
+                                String option2,
+                                String option3,
+                                String option4,
+                                String answer,
+                                String createdAt,
+                                String updatedAt) {
     }
 }

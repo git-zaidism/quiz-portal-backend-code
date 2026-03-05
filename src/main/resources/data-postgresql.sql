@@ -19,6 +19,27 @@ CREATE SEQUENCE IF NOT EXISTS question_ques_id_seq START WITH 1 INCREMENT BY 1;
 ALTER TABLE question ALTER COLUMN ques_id SET DEFAULT nextval('question_ques_id_seq');
 SELECT setval('question_ques_id_seq', COALESCE((SELECT MAX(ques_id) FROM question), 0) + 1, false);
 
+-- Audit columns for core entities
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+UPDATE users SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE users SET updated_at = NOW() WHERE updated_at IS NULL;
+
+ALTER TABLE category ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
+ALTER TABLE category ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+UPDATE category SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE category SET updated_at = NOW() WHERE updated_at IS NULL;
+
+ALTER TABLE quiz ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
+ALTER TABLE quiz ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+UPDATE quiz SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE quiz SET updated_at = NOW() WHERE updated_at IS NULL;
+
+ALTER TABLE question ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
+ALTER TABLE question ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+UPDATE question SET created_at = NOW() WHERE created_at IS NULL;
+UPDATE question SET updated_at = NOW() WHERE updated_at IS NULL;
+
 -- Seed ADMIN role if missing
 INSERT INTO roles (role_id, role_name)
 SELECT 44, 'ADMIN'

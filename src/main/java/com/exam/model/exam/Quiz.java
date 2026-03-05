@@ -1,5 +1,6 @@
 package com.exam.model.exam;
 
+import com.exam.model.AuditableEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Setter
 @Getter
-public class Quiz {
+public class Quiz extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

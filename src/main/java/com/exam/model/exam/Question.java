@@ -1,6 +1,7 @@
 package com.exam.model.exam;
 
 
+import com.exam.model.AuditableEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,7 @@ import jakarta.persistence.*;
 @AllArgsConstructor
 @Setter
 @Getter
-public class Question {
+public class Question extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
