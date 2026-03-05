@@ -8,7 +8,7 @@
         <version>4.0.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.exam</groupId>
+    <groupId>com.quiz</groupId>
     <artifactId>examserver</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>examserver</name>
