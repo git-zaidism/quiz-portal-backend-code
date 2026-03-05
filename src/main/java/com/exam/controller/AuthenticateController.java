@@ -7,12 +7,13 @@ import com.exam.model.JwtResponse;
 import com.exam.model.User;
 import com.exam.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +47,29 @@ public class AuthenticateController {
         }
         /////////////authenticate
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(jwtRequest.getUsername());
+        String token = this.jwtUtils.generateToken(userDetails);
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
+
+    //generate token only for admin users
+    @PostMapping("/generate-admin-token")
+    public ResponseEntity<?> generateAdminToken(@RequestBody JwtRequest jwtRequest) throws Exception {
+        try {
+            authenticate(jwtRequest.getUsername(), jwtRequest.getPassword());
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
+            throw new Exception("User not found ");
+        }
+
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(jwtRequest.getUsername());
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> "ADMIN".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role));
+
+        if (!isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admin user can generate admin token");
+        }
+
         String token = this.jwtUtils.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(token));
     }

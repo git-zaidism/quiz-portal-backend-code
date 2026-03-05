@@ -54,7 +54,7 @@ public class MySecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/generate-token", "/user/").permitAll()
+                        .requestMatchers("/generate-token", "/generate-admin-token", "/user/").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(this.unauthorizedHandler))
