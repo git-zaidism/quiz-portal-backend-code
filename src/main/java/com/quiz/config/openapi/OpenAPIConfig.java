@@ -1,4 +1,4 @@
-package com.quiz.config;
+package com.quiz.config.openapi;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
