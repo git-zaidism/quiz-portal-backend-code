@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.quiz</groupId>
-    <artifactId>examserver</artifactId>
+    <artifactId>quiz-boot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>examserver</name>
+    <name>quiz-boot</name>
     <description>backend code for exam portal</description>
     <properties>
         <java.version>25</java.version>
