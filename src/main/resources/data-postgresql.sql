@@ -22,23 +22,39 @@ SELECT setval('question_ques_id_seq', COALESCE((SELECT MAX(ques_id) FROM questio
 -- Audit columns for core entities
 ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 UPDATE users SET created_at = NOW() WHERE created_at IS NULL;
 UPDATE users SET updated_at = NOW() WHERE updated_at IS NULL;
+UPDATE users SET created_by = 'SYSTEM' WHERE created_by IS NULL;
+UPDATE users SET updated_by = 'SYSTEM' WHERE updated_by IS NULL;
 
 ALTER TABLE category ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
 ALTER TABLE category ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE category ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE category ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 UPDATE category SET created_at = NOW() WHERE created_at IS NULL;
 UPDATE category SET updated_at = NOW() WHERE updated_at IS NULL;
+UPDATE category SET created_by = 'SYSTEM' WHERE created_by IS NULL;
+UPDATE category SET updated_by = 'SYSTEM' WHERE updated_by IS NULL;
 
 ALTER TABLE quiz ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
 ALTER TABLE quiz ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE quiz ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE quiz ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 UPDATE quiz SET created_at = NOW() WHERE created_at IS NULL;
 UPDATE quiz SET updated_at = NOW() WHERE updated_at IS NULL;
+UPDATE quiz SET created_by = 'SYSTEM' WHERE created_by IS NULL;
+UPDATE quiz SET updated_by = 'SYSTEM' WHERE updated_by IS NULL;
 
 ALTER TABLE question ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ;
 ALTER TABLE question ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;
+ALTER TABLE question ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE question ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 UPDATE question SET created_at = NOW() WHERE created_at IS NULL;
 UPDATE question SET updated_at = NOW() WHERE updated_at IS NULL;
+UPDATE question SET created_by = 'SYSTEM' WHERE created_by IS NULL;
+UPDATE question SET updated_by = 'SYSTEM' WHERE updated_by IS NULL;
 
 -- Seed ADMIN role if missing
 INSERT INTO roles (role_id, role_name)

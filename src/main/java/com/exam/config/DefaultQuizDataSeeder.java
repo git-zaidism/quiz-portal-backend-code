@@ -168,6 +168,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                     "Option D",
                     "Option A",
                     null,
+                    null,
+                    null,
                     null
             ));
             index++;
@@ -183,6 +185,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                 q.getOption3(),
                 q.getOption4(),
                 q.getAnswer(),
+                null,
+                null,
                 null,
                 null
         ));
@@ -211,6 +215,8 @@ public class DefaultQuizDataSeeder implements CommandLineRunner {
                                 String option4,
                                 String answer,
                                 String createdAt,
-                                String updatedAt) {
+                                String updatedAt,
+                                String createdBy,
+                                String updatedBy) {
     }
 }

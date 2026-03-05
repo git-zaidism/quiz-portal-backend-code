@@ -48,7 +48,7 @@ public class AuthenticateController {
         /////////////authenticate
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(jwtRequest.getUsername());
         String token = this.jwtUtils.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(token, this.jwtUtils.getTokenValidityMinutes()));
     }
 
     //generate token only for admin users
@@ -71,7 +71,7 @@ public class AuthenticateController {
         }
 
         String token = this.jwtUtils.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(token, this.jwtUtils.getTokenValidityMinutes()));
     }
 
     private void authenticate(String username, String password) throws Exception {
