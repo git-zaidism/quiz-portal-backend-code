@@ -1,73 +1,73 @@
 package com.exam.controller;
 
-import com.exam.model.exam.Category;
-import com.exam.model.exam.Quiz;
+import com.exam.dto.quiz.QuizRequest;
+import com.exam.dto.quiz.QuizResponse;
+import com.exam.mapper.QuizMapper;
 import com.exam.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/quiz")
+@RequiredArgsConstructor
 public class QuizController {
 
-    @Autowired
-    private QuizService quizService;
+    private final QuizService quizService;
+    private final QuizMapper quizMapper;
 
-    //add quiz service
-    @PostMapping("/")
-    public ResponseEntity<Quiz> add(@RequestBody Quiz quiz) {
-        return ResponseEntity.ok(this.quizService.addQuiz(quiz));
+    @PostMapping
+    public ResponseEntity<QuizResponse> createQuiz(@Valid @RequestBody QuizRequest request) {
+        return ResponseEntity.ok(this.quizMapper.toResponse(this.quizService.createQuiz(this.quizMapper.toEntity(request))));
     }
 
-    //update quiz
-
-    @PutMapping("/")
-    public ResponseEntity<Quiz> update(@RequestBody Quiz quiz) {
-        return ResponseEntity.ok(this.quizService.updateQuiz(quiz));
+    @PutMapping
+    public ResponseEntity<QuizResponse> updateQuiz(@Valid @RequestBody QuizRequest request) {
+        return ResponseEntity.ok(this.quizMapper.toResponse(this.quizService.updateQuiz(this.quizMapper.toEntity(request))));
     }
 
-    //get quiz
-    @GetMapping("/")
-    public ResponseEntity<?> quizzes() {
-        return ResponseEntity.ok(this.quizService.getQuizzes());
+    @GetMapping
+    public ResponseEntity<Set<QuizResponse>> getAllQuizzes() {
+        Set<QuizResponse> quizzes = this.quizService.getAllQuizzes().stream()
+                .map(this.quizMapper::toResponse)
+                .collect(Collectors.toSet());
+        return ResponseEntity.ok(quizzes);
     }
 
-    //get single quiz
-    @GetMapping("/{qid}")
-    public Quiz quiz(@PathVariable("qid") Long qid) {
-        return this.quizService.getQuiz(qid);
+    @GetMapping("/{quizId}")
+    public QuizResponse getQuizById(@PathVariable("quizId") Long quizId) {
+        return this.quizMapper.toResponse(this.quizService.getQuizById(quizId));
     }
 
-    //delete the quiz
-    @DeleteMapping("/{qid}")
-    public void delete(@PathVariable("qid") Long qid) {
-        this.quizService.deleteQuiz(qid);
+    @DeleteMapping("/{quizId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteQuizById(@PathVariable("quizId") Long quizId) {
+        this.quizService.deleteQuizById(quizId);
     }
 
-    @GetMapping("/category/{cid}")
-    public List<Quiz> getQuizzesOfCategory(@PathVariable("cid") Long cid) {
-        Category category = new Category();
-        category.setCid(cid);
-        return this.quizService.getQuizzesOfCategory(category);
+    @GetMapping("/category/{categoryId}")
+    public List<QuizResponse> getQuizzesByCategory(@PathVariable("categoryId") Long categoryId) {
+        return this.quizService.getQuizzesByCategory(this.quizMapper.toCategoryReference(categoryId)).stream()
+                .map(this.quizMapper::toResponse)
+                .toList();
     }
 
-    //get active quizzes
     @GetMapping("/active")
-    public List<Quiz> getActiveQuizzes() {
-        return this.quizService.getActiveQuizzes();
+    public List<QuizResponse> getActiveQuizzes() {
+        return this.quizService.getAllActiveQuizzes().stream().map(this.quizMapper::toResponse).toList();
     }
 
-    //get active quizzes of category
-    @GetMapping("/category/active/{cid}")
-    public List<Quiz> getActiveQuizzes(@PathVariable("cid") Long cid) {
-        Category category = new Category();
-        category.setCid(cid);
-        return this.quizService.getActiveQuizzesOfCategory(category);
+    @GetMapping("/category/active/{categoryId}")
+    public List<QuizResponse> getActiveQuizzesByCategory(@PathVariable("categoryId") Long categoryId) {
+        return this.quizService.getActiveQuizzesByCategory(this.quizMapper.toCategoryReference(categoryId)).stream()
+                .map(this.quizMapper::toResponse)
+                .toList();
     }
-
-
 }

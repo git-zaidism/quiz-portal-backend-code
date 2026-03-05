@@ -1,114 +1,73 @@
 package com.exam.controller;
 
-import com.exam.model.exam.Question;
-import com.exam.model.exam.Quiz;
+import com.exam.dto.question.QuestionEvaluationRequest;
+import com.exam.dto.question.QuestionPublicResponse;
+import com.exam.dto.question.QuestionRequest;
+import com.exam.dto.question.QuestionResponse;
+import com.exam.dto.question.QuizEvaluationResponse;
+import com.exam.mapper.QuestionMapper;
+import com.exam.entities.Question;
+import com.exam.entities.Quiz;
 import com.exam.service.QuestionService;
 import com.exam.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/question")
+@RequiredArgsConstructor
 public class QuestionController {
-    @Autowired
-    private QuestionService service;
 
-    @Autowired
-    private QuizService quizService;
+    private final QuestionService questionService;
+    private final QuizService quizService;
+    private final QuestionMapper questionMapper;
 
-    //add question
-    @PostMapping("/")
-    public ResponseEntity<Question> add(@RequestBody Question question) {
-        return ResponseEntity.ok(this.service.addQuestion(question));
+    @PostMapping
+    public ResponseEntity<QuestionResponse> createQuestion(@Valid @RequestBody QuestionRequest request) {
+        return ResponseEntity.ok(this.questionMapper.toResponse(this.questionService.createQuestion(this.questionMapper.toEntity(request))));
     }
 
-    //update the question
-    @PutMapping("/")
-    public ResponseEntity<Question> update(@RequestBody Question question) {
-        return ResponseEntity.ok(this.service.updateQuestion(question));
+    @PutMapping
+    public ResponseEntity<QuestionResponse> updateQuestion(@Valid @RequestBody QuestionRequest request) {
+        return ResponseEntity.ok(this.questionMapper.toResponse(this.questionService.updateQuestion(this.questionMapper.toEntity(request))));
     }
 
-    //get all question of any quid
-    @GetMapping("/quiz/{qid}")
-    public ResponseEntity<?> getQuestionsOfQuiz(@PathVariable("qid") Long qid) {
-//        Quiz quiz = new Quiz();
-//        quiz.setqId(qid);
-//        Set<Question> questionsOfQuiz = this.service.getQuestionsOfQuiz(quiz);
-//        return ResponseEntity.ok(questionsOfQuiz);
-
-        Quiz quiz = this.quizService.getQuiz(qid);
-        Set<Question> questions = quiz.getQuestions();
-        List list = new ArrayList(questions);
-        if (list.size() > Integer.parseInt(quiz.getNumberOfQuestions())) {
-            list = list.subList(0, Integer.parseInt(quiz.getNumberOfQuestions() + 1));
-        }
-        Collections.shuffle(list);
-        return ResponseEntity.ok(list);
-
-
+    @GetMapping("/quiz/{quizId}")
+    public ResponseEntity<List<QuestionPublicResponse>> getQuestionsForQuizAttempt(@PathVariable("quizId") Long quizId) {
+        Quiz quiz = this.quizService.getQuizById(quizId);
+        List<Question> questions = this.questionService.getQuestionsForQuizAttempt(quiz);
+        List<QuestionPublicResponse> questionResponses = questions.stream().map(this.questionMapper::toPublicResponse).toList();
+        return ResponseEntity.ok(questionResponses);
     }
 
-
-    @GetMapping("/quiz/all/{qid}")
-    public ResponseEntity<?> getQuestionsOfQuizAdmin(@PathVariable("qid") Long qid) {
-        Quiz quiz = new Quiz();
-        quiz.setqId(qid);
-        Set<Question> questionsOfQuiz = this.service.getQuestionsOfQuiz(quiz);
-        return ResponseEntity.ok(questionsOfQuiz);
-
-//        return ResponseEntity.ok(list);
-
-
+    @GetMapping("/quiz/all/{quizId}")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByQuizForAdmin(@PathVariable("quizId") Long quizId) {
+        Set<Question> questions = this.questionService.getQuestionsByQuiz(this.questionMapper.toQuizReference(quizId));
+        List<QuestionResponse> questionResponses = questions.stream().map(this.questionMapper::toResponse).toList();
+        return ResponseEntity.ok(questionResponses);
     }
 
-
-    //get single question
-    @GetMapping("/{quesId}")
-    public Question get(@PathVariable("quesId") Long quesId) {
-        return this.service.getQuestion(quesId);
+    @GetMapping("/{questionId}")
+    public QuestionResponse getQuestionById(@PathVariable("questionId") Long questionId) {
+        return this.questionMapper.toResponse(this.questionService.getQuestionById(questionId));
     }
 
-    //delete question
-    @DeleteMapping("/{quesId}")
-    public void delete(@PathVariable("quesId") Long quesId) {
-        this.service.deleteQuestion(quesId);
+    @DeleteMapping("/{questionId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteQuestionById(@PathVariable("questionId") Long questionId) {
+        this.questionService.deleteQuestionById(questionId);
     }
 
-
-    //eval quiz
     @PostMapping("/eval-quiz")
-    public ResponseEntity<?> evalQuiz(@RequestBody List<Question> questions) {
-        System.out.println(questions);
-        double marksGot = 0;
-        int correctAnswers = 0;
-        int attempted = 0;
-        for (Question q : questions) {
-            //single questions
-            Question question = this.service.get(q.getQuesId());
-            if (question.getAnswer().equals(q.getGivenAnswer())) {
-                //correct
-                correctAnswers++;
-
-                double marksSingle = Double.parseDouble(questions.get(0).getQuiz().getMaxMarks()) / questions.size();
-                //       this.questions[0].quiz.maxMarks / this.questions.length;
-                marksGot += marksSingle;
-
-            }
-
-            if (q.getGivenAnswer() != null) {
-                attempted++;
-            }
-
-        }
-        ;
-
-        Map<String, Object> map = Map.of("marksGot", marksGot, "correctAnswers", correctAnswers, "attempted", attempted);
-        return ResponseEntity.ok(map);
-
+    public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
+            @Valid @RequestBody List<@Valid QuestionEvaluationRequest> evaluationRequests) {
+        return ResponseEntity.ok(this.questionService.evaluateQuiz(evaluationRequests));
     }
-
 }
