@@ -12,7 +12,7 @@ public class QuestionMapper {
 
     public Question toEntity(QuestionRequest request) {
         Question question = new Question();
-        if (request.questionId() != null) {
+        if (request.questionId() != null && request.questionId() != 0) {
             question.setId(request.questionId());
         }
         question.setContent(request.content());

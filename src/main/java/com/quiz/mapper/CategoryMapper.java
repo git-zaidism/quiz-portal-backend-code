@@ -10,7 +10,9 @@ public class CategoryMapper {
 
     public Category toEntity(CategoryRequest request) {
         Category category = new Category();
-        category.setId(request.categoryId());
+        if (request.categoryId() != null && request.categoryId() != 0) {
+            category.setId(request.categoryId());
+        }
         category.setTitle(request.title());
         category.setDescription(request.description());
         return category;

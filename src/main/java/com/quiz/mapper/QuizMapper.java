@@ -11,7 +11,7 @@ public class QuizMapper {
 
     public Quiz toEntity(QuizRequest request) {
         Quiz quiz = new Quiz();
-        if (request.quizId() != null) {
+        if (request.quizId() != null && request.quizId() != 0) {
             quiz.setId(request.quizId());
         }
         quiz.setTitle(request.title());
